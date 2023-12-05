@@ -44,58 +44,70 @@ func main2() {
 	}
 }
 
-type model struct {
+type sessionState int
+
+const (
+	mainView sessionState = iota
+	chatView
+)
+
+type mainModel struct {
+	state     sessionState
 	menuitems []string
 	cursor    int
 }
 
-func (m model) Init() tea.Cmd {
-    return nil
+func (m mainModel) Init() tea.Cmd {
+	return nil
 }
 
-func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
-    switch msg := msg.(type) {
-    case tea.KeyMsg:
-        switch msg.String() {
-        case "ctrl+c", "q":
-            return m, tea.Quit
-        case "up", "k":
-            if m.cursor > 0 {
-                m.cursor--
-            }
-        case "down", "j":
-            if m.cursor < len(m.menuitems) - 1 {
-                m.cursor++
-            }
-        case "enter", " ":
-        }
+func (m mainModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
+	switch msg := msg.(type) {
+	case tea.KeyMsg:
+		switch msg.String() {
+		case "ctrl+c", "q":
+			return m, tea.Quit
+		case "up", "k":
+			if m.cursor > 0 {
+				m.cursor--
+			}
+		case "down", "j":
+			if m.cursor < len(m.menuitems)-1 {
+				m.cursor++
+			}
+		case "enter", " ":
+		}
+	}
+    switch m.state {
+    case mainView:
+
     }
-    return m, nil
+	return m, nil
 }
 
-func (m model) View() string {
-    s := "Go Websocket Chat\n"
-    for i, menuitem := range m.menuitems {
-        cursor := " "
-        if m.cursor == i {
-            cursor = ">"
-        }
-        s += fmt.Sprintf("%s %s\n", cursor, menuitem)
-    }
-    s += "\nPress q to quit.\n"
-    return s
+func (m mainModel) View() string {
+	s := "Go Websocket Chat\n"
+	for i, menuitem := range m.menuitems {
+		cursor := " "
+		if m.cursor == i {
+			cursor = ">"
+		}
+		s += fmt.Sprintf("%s %s\n", cursor, menuitem)
+	}
+	s += "\nPress q to quit.\n"
+	return s
 }
 
-func initialModel() model {
-    return model {
-        menuitems: []string{"Join room", "Create room"},
-    }
+func initialModel() mainModel {
+	return mainModel{
+		menuitems: []string{"Join room", "Create room"},
+	}
 }
 
 func main() {
-    p := tea.NewProgram(initialModel())
-    if _, err := p.Run(); err != nil {
-        fmt.Printf("Error running bubbletea program: %v", err)
-        os.Exit(1)
-    }
+	p := tea.NewProgram(initialModel())
+	if _, err := p.Run(); err != nil {
+		fmt.Printf("Error running bubbletea program: %v", err)
+		os.Exit(1)
+	}
 }
